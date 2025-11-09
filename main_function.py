@@ -344,7 +344,7 @@ def getDetails(OPENROUTER_API_KEY):
                 st.session_state.last_filename = uploaded.name
                 with st.spinner("Generating JSON…"):
                     raw_text = file_to_text(file_bytes)
-                    client = get_openrouter_client(get_openrouter_client)
+                    client = get_openrouter_client(OPENROUTER_API_KEY)
                     vendor_str = generate_json_section(build_prompt_vendor(raw_text), client)
                     invoice_str = generate_json_section(build_prompt_invoice(raw_text), client)
                     item_str = generate_json_section(build_prompt_products(raw_text), client)
