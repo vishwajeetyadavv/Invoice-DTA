@@ -4,7 +4,9 @@ from streamlit_authenticator import Authenticate
 def to_plain_recursive(d):
     """
     Recursively converts a Streamlit Secrets object (or any dict-like object)
-    into a plain Python dictionary.
+    into a plain Python dictionary. This is necessary because st.secrets
+    objects are read-only proxies, but streamlit-authenticator needs
+    to modify the credentials dictionary internally.
     
     Args:
         d: A dict-like object (e.g., dict, streamlit.runtime.secrets.Secrets)
@@ -24,6 +26,7 @@ def to_plain_recursive(d):
 # --- Main App ---
 try:
     # Get credentials from secrets and convert them to plain dicts
+    # This is the fix: calling the correct recursive function
     credentials = to_plain_recursive(st.secrets["credentials"])
     cookie = to_plain_recursive(st.secrets["cookie"])
 
@@ -61,11 +64,10 @@ try:
 
 except KeyError as e:
     st.error(f"Error: Missing key {e} in secrets.toml. Please check your configuration.")
+    st.caption("Please ensure your `secrets.toml` file contains all required sections: `[cookie]` and `[credentials]'.")
 except Exception as e:
-    st.error(f"An error occurred during authentication setup: {e}")
-    st.info("""
-    Please ensure your `secrets.toml` file is correctly formatted.
-    """)
+    st.error(f"An unexpected error occurred: {e}")
+    st.info("There might be an issue with your `secrets.toml` formatting or the authenticator setup.")
 
 # Optional: quick diagnostics in the footer
 import streamlit_authenticator as stauth
