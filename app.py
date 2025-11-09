@@ -5,15 +5,16 @@ import inspect
 
 st.set_page_config(page_title="Auth Demo", page_icon="🔐")
 
+# --- Deep-copy st.secrets to plain, mutable dicts ---
 def to_plain(o):
     if isinstance(o, Mapping): return {k: to_plain(v) for k, v in o.items()}
     if isinstance(o, (list, tuple)): return [to_plain(x) for x in o]
     return o
 
-# Load & normalize secrets
 raw_credentials = to_plain(st.secrets["credentials"])
 cookie = to_plain(st.secrets["cookie"])
 
+# Normalize to the schema expected by streamlit-authenticator
 def normalize_credentials(creds):
     users = creds.get("usernames", {})
     cleaned = {}
@@ -39,19 +40,55 @@ authenticator = stauth.Authenticate(
 
 st.title("🔐 Login")
 
-# ---- Call .login() compatibly across versions ----
-login_sig = inspect.signature(authenticator.login)
-params = login_sig.parameters
+# --- Version-flexible login call + return normalization ---
+def call_login_compat(auth):
+    """Call stauth.Authenticate.login across versions and normalize the return."""
+    sig = inspect.signature(auth.login)
+    params = list(sig.parameters.keys())
 
-if "form_name" in params:
-    # Older API: login(form_name, location="main")
-    name, auth_status, username = authenticator.login("Login", location="main")
-else:
-    # Newer API: login(location="main")  (form_name removed/changed)
-    # Some releases also accept a `key` to avoid widget clashes.
-    name, auth_status, username = authenticator.login(location="main", key="login_form")
+    # Try safest pattern first: no args
+    try:
+        res = auth.login()
+    except TypeError:
+        res = None
 
-# ---- Post-login UI ----
+    # If that failed or returned None, try with positional only
+    if res is None:
+        try:
+            # Many versions treat the 1st positional arg as form name or location
+            res = auth.login("Login")
+        except TypeError:
+            res = None
+
+    # If still None, try explicit kwarg for location
+    if res is None:
+        try:
+            res = auth.login(location="main")
+        except TypeError:
+            res = None
+
+    # If still None, try ("Login", location="main")
+    if res is None:
+        try:
+            res = auth.login("Login", location="main")
+        except TypeError:
+            res = None
+
+    # Normalize return into (name, auth_status, username)
+    name = auth_status = username = None
+    if isinstance(res, tuple) and len(res) == 3:
+        name, auth_status, username = res
+    elif isinstance(res, dict):
+        # Some versions returned a dict
+        name = res.get("name")
+        auth_status = res.get("authentication_status")
+        username = res.get("username")
+
+    return name, auth_status, username
+
+name, auth_status, username = call_login_compat(authenticator)
+
+# --- Post-login UI ---
 if auth_status:
     st.success(f"Welcome, {name}!")
     st.write(f"Username: `{username}`")
