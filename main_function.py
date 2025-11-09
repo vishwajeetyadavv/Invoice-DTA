@@ -253,19 +253,22 @@ def pretty_json_text(obj_or_text) -> str:
         return str(obj_or_text)
 
 
-# ========== SESSION STATE ==========
-if "edit_mode" not in st.session_state:
-    st.session_state.edit_mode = False
-if "json_text" not in st.session_state:
-    st.session_state.json_text = ""
-if "original_json_text" not in st.session_state:
-    st.session_state.original_json_text = ""
-if "json_error" not in st.session_state:
-    st.session_state.json_error = ""
 
 
-# ========== UI ==========
+
+
 def getDetails(OPENROUTER_API_KEY):
+        # ========== SESSION STATE ==========
+    if "edit_mode" not in st.session_state:
+        st.session_state.edit_mode = False
+    if "json_text" not in st.session_state:
+        st.session_state.json_text = ""
+    if "original_json_text" not in st.session_state:
+        st.session_state.original_json_text = ""
+    if "json_error" not in st.session_state:
+        st.session_state.json_error = ""
+
+    # ========== UI ==========
     st.markdown("""
     <style>
     .fixed-header {
