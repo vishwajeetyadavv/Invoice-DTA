@@ -1,16 +1,18 @@
 import streamlit as st
 from streamlit_authenticator import Authenticate
-from copy import deepcopy
+from collections.abc import Mapping
 
-# Read from secrets (read-only objects)
-_secrets_credentials = st.secrets["credentials"]
-_secrets_cookie = st.secrets["cookie"]
+def to_plain_dict(x):
+    if isinstance(x, Mapping):
+        return {k: to_plain_dict(v) for k, v in x.items()}
+    if isinstance(x, (list, tuple)):
+        return [to_plain_dict(i) for i in x]
+    return x
 
-# Make mutable copies
-credentials = deepcopy(_secrets_credentials)
-cookie = deepcopy(_secrets_cookie)
+# Read from secrets (read-only Mapping) → convert to plain dicts
+credentials = to_plain_dict(st.secrets["credentials"])
+cookie = to_plain_dict(st.secrets["cookie"])
 
-# Build authenticator
 authenticator = Authenticate(
     credentials=credentials,
     cookie_name=cookie["name"],
@@ -18,7 +20,6 @@ authenticator = Authenticate(
     cookie_expiry_days=int(cookie["expiry_days"]),
 )
 
-# Login widget
 name, authentication_status, username = authenticator.login("Login", "main")
 
 if authentication_status:
