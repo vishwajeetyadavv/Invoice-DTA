@@ -20,7 +20,8 @@ authenticator = Authenticate(
     cookie_expiry_days=int(cookie["expiry_days"]),
 )
 
-name, authentication_status, username = authenticator.login("Login", "main")
+# name, authentication_status, username = authenticator.login("Login", "main")
+name, authentication_status, username = authenticator.login("Login", location="sidebar")
 
 if authentication_status:
     st.sidebar.success(f"Welcome {name} 👋")
