@@ -2,22 +2,32 @@ import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
 
-# Load secrets
-secrets = st.secrets["credentials"]
-auth_config = st.secrets["authenticator"]
+# # Load secrets
+# secrets = st.secrets["credentials"]
+# auth_config = st.secrets["authenticator"]
 
-credentials = {
-    "usernames": secrets["usernames"]
-}
+# credentials = {
+#     "usernames": secrets["usernames"]
+# }
 
-# Initialize authenticator
-authenticator = stauth.Authenticate(
-    credentials,
-    auth_config["cookie_name"],
-    auth_config["cookie_key"],
-    auth_config["expiry_days"]
+# # Initialize authenticator
+# authenticator = stauth.Authenticate(
+#     credentials,
+#     auth_config["cookie_name"],
+#     auth_config["cookie_key"],
+#     auth_config["expiry_days"]
+# )
+
+
+credentials = st.secrets["credentials"]
+cookie = st.secrets["cookie"]
+
+authenticator = Authenticate(
+    credentials=credentials,
+    cookie_name=cookie["name"],
+    key=cookie["key"],
+    cookie_expiry_days=int(cookie["expiry_days"]),
 )
-
 # Login widget
 name, authentication_status, username = authenticator.login("Login", "main")
 
