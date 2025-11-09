@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit_authenticator as stauth
 from collections.abc import Mapping
 import inspect
-
+from main_function import getDetails
 st.set_page_config(page_title="Auth Demo", page_icon="🔐")
 
 # --- Deep-copy st.secrets to plain, mutable dicts ---
@@ -90,8 +90,10 @@ name, auth_status, username = call_login_compat(authenticator)
 
 # --- Post-login UI ---
 if auth_status:
-    st.success(f"Welcome, {name}!")
-    st.write(f"Username: `{username}`")
+    # st.success(f"Welcome, {name}!")
+    # st.write(f"Username: `{username}`")
+    api_key = st.secrets["api_keys"]["openrouter"]
+    getDetails(api_key)
     authenticator.logout("Logout", "sidebar")
 elif auth_status is False:
     st.error("Username or password is incorrect.")
