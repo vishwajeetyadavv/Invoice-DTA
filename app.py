@@ -11,7 +11,7 @@ cookie = to_plain(st.secrets["cookie"])
 authenticator = Authenticate(
     credentials=credentials,
     cookie_name=cookie["name"],
-    signature_key=cookie["key"], # <-- FIX: The parameter is 'signature_key', not 'key' for v0.3.2
+    cookie_key=cookie["key"], # <-- FIX: The correct parameter is 'cookie_key'
     cookie_expiry_days=int(cookie["expiry_days"]),
 )
 
