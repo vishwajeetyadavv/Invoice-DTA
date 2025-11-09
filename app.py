@@ -1,9 +1,18 @@
 import streamlit as st
 from streamlit_authenticator import Authenticate
+from streamlit.runtime.secrets import Secrets # <-- Import the Secrets class
 
 # Convert st.secrets (read-only proxy) to plain dicts
 def to_plain(d):
-    return {k: to_plain(v) if isinstance(v, dict) else v for k, v in dict(d).items()}
+    # Convert the top level from Secrets proxy to dict if it is one
+    if isinstance(d, Secrets):
+        d = dict(d)
+    
+    # Recurse on values, checking for both dict and Secrets
+    return {
+        k: to_plain(v) if isinstance(v, (dict, Secrets)) else v 
+        for k, v in d.items()
+    }
 
 credentials = to_plain(st.secrets["credentials"])
 cookie = to_plain(st.secrets["cookie"])
@@ -11,7 +20,7 @@ cookie = to_plain(st.secrets["cookie"])
 authenticator = Authenticate(
     credentials=credentials,
     cookie_name=cookie["name"],
-    cookie_key=cookie["key"], # <-- FIX: The correct parameter is 'cookie_key'
+    cookie_key=cookie["key"], # <-- This was the correct fix from last time
     cookie_expiry_days=int(cookie["expiry_days"]),
 )
 
