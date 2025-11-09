@@ -1,2 +1,8 @@
+PyPDF2
+google-generativeai
+openai
+PyMuPDF
+requests
+pandas
 streamlit==1.38.0
 streamlit-authenticator==0.3.2
