@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
-
+from streamlit_authenticator import Authenticate
 # # Load secrets
 # secrets = st.secrets["credentials"]
 # auth_config = st.secrets["authenticator"]
